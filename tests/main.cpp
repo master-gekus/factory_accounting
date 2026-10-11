@@ -13,9 +13,9 @@ TEST(FactoryAccounting, HireWorkers) {
   {
     using Factory = facc::FactoryAccounting<std::string>;
     Factory factory;
-    const auto *w1{factory.hire<Factory::Worker>(100u, 0, "Worker 1")};
+    auto *w1{factory.hire<Factory::Worker>(100u, 0, "Worker 1")};
     EXPECT_EQ(factory.employees().size(), 1);
-    const auto *w2{factory.hire<Factory::Worker>(200u, 2, "Worker 2")};
+    auto *w2{factory.hire<Factory::Worker>(200u, 2, "Worker 2")};
     EXPECT_EQ(factory.employees().size(), 2);
     EXPECT_EQ(w1->data(), "Worker 1");
     EXPECT_EQ(w2->data(), "Worker 2");
@@ -85,4 +85,25 @@ TEST(FactoryAccounting, HireManager) {
   EXPECT_TRUE(m->type() == Factory::Type::Manager);
   EXPECT_EQ(m->basicSalary(), 100u);
   EXPECT_EQ(m->relativeStart(), 0);
+}
+
+TEST(FactoryAccounting, SimpleHireAndFire) {
+  using Factory = facc::FactoryAccounting<std::string>;
+  Factory factory;
+  auto *w{factory.hire<Factory::Worker>(100u, 0, "Worker")};
+  auto *f{factory.hire<Factory::Worker>(100u, 0, "Foreman")};
+  auto *m{factory.hire<Factory::Worker>(100u, 0, "Manager")};
+  EXPECT_EQ(factory.employees().size(), 3);
+  factory.fire(w);
+  EXPECT_EQ(factory.employees().size(), 2);
+  factory.fire(w);
+  EXPECT_EQ(factory.employees().size(), 2);
+  factory.fire(m);
+  EXPECT_EQ(factory.employees().size(), 1);
+  factory.fire(m);
+  EXPECT_EQ(factory.employees().size(), 1);
+  factory.fire(f);
+  EXPECT_EQ(factory.employees().size(), 0);
+  factory.fire(f);
+  EXPECT_EQ(factory.employees().size(), 0);
 }

@@ -43,6 +43,12 @@ namespace facc {
       return employee;
     }
 
+    void fire(Employee *employee) {
+      if (employees_.erase(employee)) {
+        delete employee;
+      }
+    }
+
    private:
     std::set<Employee *> employees_;
   };

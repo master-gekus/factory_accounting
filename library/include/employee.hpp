@@ -27,7 +27,14 @@ namespace facc {
           relativeStart_{relativeStart},
           d_{std::forward<Args>(args)...},
           boss_{nullptr} {}
-    virtual ~Employee() {};
+    virtual ~Employee() {
+      for(auto *s : subs_) {
+        s->removeBoss(this);
+      }
+      if(boss_) {
+        boss_->removeSub(this);
+      }
+    };
 
    private:
     Employee() = default;
@@ -59,6 +66,17 @@ namespace facc {
 
     auto relativeStart() const noexcept {
       return relativeStart_;
+    }
+
+   private:
+    void removeBoss(Employee *boss) {
+      if (boss_ == boss) {
+        boss_ = nullptr;
+      }
+    }
+
+    void removeSub(Employee *sub) {
+      subs_.erase(sub);
     }
 
    public:

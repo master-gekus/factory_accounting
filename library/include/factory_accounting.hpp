@@ -1,8 +1,12 @@
 #ifndef FACC_FACTORY_ACCOUNTING_HPP_INCLUDED
 #define FACC_FACTORY_ACCOUNTING_HPP_INCLUDED
 
-#include <list>
+#include <set>
+#include <type_traits>
+
 #include "employee.hpp"
+#include "foreman.hpp"
+#include "manager.hpp"
 #include "worker.hpp"
 
 namespace facc {
@@ -12,6 +16,8 @@ namespace facc {
     using Type = typename facc::Employee<D>::Type;
     using Employee = typename facc::Employee<D>;
     using Worker = typename facc::Worker<D>;
+    using Foreman = typename facc::Foreman<D>;
+    using Manager = typename facc::Manager<D>;
 
    public:
     ~FactoryAccounting() {
@@ -26,15 +32,19 @@ namespace facc {
     }
 
    public:
-    template <typename... Args>
-    const Employee *addWorker(Args &&...args) {
-      auto *worker = new Worker{std::forward<Args>(args)...};
-      employees_.push_back(worker);
-      return worker;
+    template <typename T, typename... Args>
+    /// \todo Переделать на requires
+    typename std::enable_if<std::is_same_v<T, Worker>
+                                || std::is_same_v<T, Foreman>
+                                || std::is_same_v<T, Manager>,
+                            Employee *>::type hire(Args &&...args) {
+      auto *employee = new T{std::forward<Args>(args)...};
+      employees_.insert(employee);
+      return employee;
     }
 
    private:
-    std::list<Employee *> employees_;
+    std::set<Employee *> employees_;
   };
 }  // namespace facc
 

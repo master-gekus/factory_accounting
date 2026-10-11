@@ -1,6 +1,8 @@
 ﻿#ifndef FACC_EMPLOYEE_HPP_INCLUDED
 #define FACC_EMPLOYEE_HPP_INCLUDED
 
+#include <cstdint>
+
 #include <set>
 #include <utility>
 
@@ -8,11 +10,10 @@ namespace facc {
   template <class D>
   class FactoryAccounting;
 
-
   template <class D>
   class Employee {
    public:
-    enum Type {
+    enum class Type {
       Unknown,
       Worker,
       Foreman,
@@ -21,10 +22,12 @@ namespace facc {
 
    protected:
     template <typename... Args>
-    Employee(Args &&...args) : d_{std::forward<Args>(args)...} {}
-
-   private:
-    virtual ~Employee() = default;
+    Employee(std::uint64_t basicSalary, int relativeStart, Args &&...args)
+        : basicSalary_{basicSalary},
+          relativeStart_{relativeStart},
+          d_{std::forward<Args>(args)...},
+          boss_{nullptr} {}
+    virtual ~Employee() {};
 
    private:
     Employee() = default;
@@ -46,17 +49,27 @@ namespace facc {
       return subs_;
     }
 
-    const auto boss() const noexcept {
+    auto *boss() const noexcept {
       return boss_;
+    }
+
+    auto basicSalary() const noexcept {
+      return basicSalary_;
+    }
+
+    auto relativeStart() const noexcept {
+      return relativeStart_;
     }
 
    public:
     virtual Type type() const noexcept = 0;
 
    private:
+    const std::uint64_t basicSalary_;
+    const int relativeStart_;
     D d_;
-    Employee *boss_;
     std::set<Employee *> subs_;
+    Employee *boss_;
 
     friend class FactoryAccounting<D>;
   };

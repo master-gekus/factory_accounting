@@ -6,6 +6,7 @@ add_library(${PROJECT_NAME} STATIC
     include/employee.hpp
     src/employee.cpp
     include/factory_accounting.hpp
+    include/worker.hpp
     )
 
 target_include_directories(

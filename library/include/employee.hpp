@@ -28,10 +28,10 @@ namespace facc {
           d_{std::forward<Args>(args)...},
           boss_{nullptr} {}
     virtual ~Employee() {
-      for(auto *s : subs_) {
+      for (auto *s : subs_) {
         s->removeBoss(this);
       }
-      if(boss_) {
+      if (boss_) {
         boss_->removeSub(this);
       }
     };
@@ -77,6 +77,20 @@ namespace facc {
 
     void removeSub(Employee *sub) {
       subs_.erase(sub);
+    }
+
+    bool hasSubRecurcive(Employee *sub) const {
+      if ((this == sub) || subs_.contains(sub)) {
+        return true;
+      }
+
+      for (auto *s : subs_) {
+        if (subs_.contains(sub)) {
+          return true;
+        }
+      }
+
+      return false;
     }
 
    public:

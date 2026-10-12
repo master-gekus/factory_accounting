@@ -107,3 +107,88 @@ TEST(FactoryAccounting, SimpleHireAndFire) {
   factory.fire(f);
   EXPECT_EQ(factory.employees().size(), 0);
 }
+
+TEST(FactoryAccounting, SimpleSubordination) {
+  using Factory = facc::FactoryAccounting<std::string>;
+  Factory factory;
+  auto *w{factory.hire<Factory::Worker>(100u, 0, "Worker")};
+  auto *f{factory.hire<Factory::Foreman>(100u, 0, "Foreman")};
+  auto *m{factory.hire<Factory::Manager>(100u, 0, "Manager")};
+  EXPECT_FALSE(factory.createSubordination(w, f));
+  EXPECT_FALSE(factory.createSubordination(w, m));
+  EXPECT_FALSE(factory.createSubordination(f, f));
+  EXPECT_FALSE(factory.createSubordination(m, m));
+  EXPECT_TRUE(factory.createSubordination(f, w));
+  EXPECT_TRUE(factory.createSubordination(m, f));
+  EXPECT_FALSE(factory.createSubordination(f, w));
+  EXPECT_FALSE(factory.createSubordination(m, f));
+
+  EXPECT_EQ(w->boss(), f);
+  EXPECT_EQ(f->boss(), m);
+  EXPECT_EQ(f->subs().size(), 1);
+  EXPECT_TRUE(f->subs().contains(w));
+  EXPECT_EQ(m->subs().size(), 1);
+  EXPECT_TRUE(m->subs().contains(f));
+}
+
+TEST(FactoryAccounting, ChangeSubordination) {
+  using Factory = facc::FactoryAccounting<std::string>;
+  Factory factory;
+  auto *w{factory.hire<Factory::Worker>(100u, 0, "Worker")};
+  auto *f{factory.hire<Factory::Foreman>(100u, 0, "Foreman")};
+  auto *m{factory.hire<Factory::Manager>(100u, 0, "Manager")};
+  EXPECT_TRUE(factory.createSubordination(f, w));
+  EXPECT_TRUE(factory.createSubordination(m, f));
+  EXPECT_FALSE(factory.createSubordination(f, w));
+  EXPECT_FALSE(factory.createSubordination(m, f));
+
+  EXPECT_EQ(w->boss(), f);
+  EXPECT_EQ(f->boss(), m);
+  EXPECT_EQ(f->subs().size(), 1);
+  EXPECT_TRUE(f->subs().contains(w));
+  EXPECT_EQ(m->subs().size(), 1);
+  EXPECT_TRUE(m->subs().contains(f));
+
+  // Отдаём рабочего менеджеру. У бригадира никого не остаётся. У менеджера - двое.
+  EXPECT_TRUE(factory.createSubordination(m, w));
+  EXPECT_EQ(f->subs().size(), 0);
+  EXPECT_EQ(w->boss(), m);
+  EXPECT_EQ(m->subs().size(), 2);
+  EXPECT_TRUE(m->subs().contains(w));
+  EXPECT_TRUE(m->subs().contains(f));
+}
+
+TEST(FactoryAccounting, ReleaseSubordination) {
+  using Factory = facc::FactoryAccounting<std::string>;
+  Factory factory;
+  auto *w1{factory.hire<Factory::Worker>(100u, 0, "Worker 1")};
+  auto *w2{factory.hire<Factory::Worker>(100u, 0, "Worker 2")};
+  auto *f{factory.hire<Factory::Foreman>(100u, 0, "Foreman")};
+  auto *m{factory.hire<Factory::Manager>(100u, 0, "Manager")};
+  EXPECT_TRUE(factory.createSubordination(f, w1));
+  EXPECT_TRUE(factory.createSubordination(f, w2));
+  EXPECT_TRUE(factory.createSubordination(m, f));
+
+  EXPECT_EQ(w1->boss(), f);
+  EXPECT_EQ(w2->boss(), f);
+  EXPECT_EQ(f->subs().size(), 2);
+  EXPECT_TRUE(f->subs().contains(w1));
+  EXPECT_TRUE(f->subs().contains(w2));
+
+  EXPECT_EQ(f->boss(), m);
+  EXPECT_EQ(m->subs().size(), 1);
+  EXPECT_TRUE(m->subs().contains(f));
+
+  EXPECT_FALSE(factory.releaseSubordination(m, w1));
+  EXPECT_TRUE(factory.releaseSubordination(f, w1));
+  EXPECT_FALSE(factory.releaseSubordination(f, w1));
+
+  EXPECT_EQ(w1->boss(), nullptr);
+  EXPECT_EQ(w2->boss(), f);
+  EXPECT_EQ(f->subs().size(), 1);
+  EXPECT_TRUE(f->subs().contains(w2));
+
+  EXPECT_EQ(f->boss(), m);
+  EXPECT_EQ(m->subs().size(), 1);
+  EXPECT_TRUE(m->subs().contains(f));
+}

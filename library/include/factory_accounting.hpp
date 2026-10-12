@@ -49,6 +49,41 @@ namespace facc {
       }
     }
 
+    bool createSubordination(Employee *boss, Employee *sub) {
+      if ((boss == sub) || (!canHaveSubs(boss)) || (!employees_.contains(boss))
+          || (!employees_.contains(sub))
+          || boss->subs_.contains(sub)  // Уже в списке подчинённых.
+      ) {
+        return false;
+      }
+
+      if (nullptr != sub->boss_) {
+        sub->boss_->removeSub(sub);
+      }
+
+      sub->boss_ = boss;
+      boss->subs_.insert(sub);
+
+      return true;
+    }
+
+    bool releaseSubordination(Employee *boss, Employee *sub) {
+      if ((boss == sub) || (!canHaveSubs(boss)) || (!employees_.contains(boss))
+          || (!employees_.contains(sub))
+          || (!boss->subs_.contains(sub))  // Нет в списке подчинённых.
+      ) {
+        return false;
+      }
+      boss->removeSub(sub);
+      sub->boss_ = nullptr;
+      return true;
+    }
+
+   private:
+    bool canHaveSubs(Employee *boss) {
+      return dynamic_cast<Foreman *>(boss) || dynamic_cast<Manager *>(boss);
+    }
+
    private:
     std::set<Employee *> employees_;
   };

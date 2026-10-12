@@ -12,7 +12,13 @@ namespace facc {
 
    public:
     std::uint64_t totalSalary(int mounth) const override {
-      return Employee<D>::basicSalary() * 10;
+      if (mounth <= Employee<D>::relativeStart()) {
+        return 0;
+      }
+      const auto years{(mounth - Employee<D>::relativeStart()) / 12};
+      return Employee<D>::basicSalary()
+             + ((years > 10) ? Employee<D>::basicSalary()
+                             : ((Employee<D>::basicSalary() * years) / 10));
     }
 
     friend class FactoryAccounting<D>;

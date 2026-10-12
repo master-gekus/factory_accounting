@@ -13,7 +13,6 @@ namespace facc {
   template <class D>
   class FactoryAccounting final {
    public:
-    using Type = typename facc::Employee<D>::Type;
     using Employee = typename facc::Employee<D>;
     using Worker = typename facc::Worker<D>;
     using Foreman = typename facc::Foreman<D>;

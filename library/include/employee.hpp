@@ -12,14 +12,6 @@ namespace facc {
 
   template <class D>
   class Employee {
-   public:
-    enum class Type {
-      Unknown,
-      Worker,
-      Foreman,
-      Manager,
-    };
-
    protected:
     template <typename... Args>
     Employee(std::uint64_t basicSalary, int relativeStart, Args &&...args)
@@ -68,6 +60,9 @@ namespace facc {
       return relativeStart_;
     }
 
+   public:
+    virtual std::uint64_t totalSalary(int mounth) const = 0;
+
    private:
     void removeBoss(Employee *boss) {
       if (boss_ == boss) {
@@ -92,9 +87,6 @@ namespace facc {
 
       return false;
     }
-
-   public:
-    virtual Type type() const noexcept = 0;
 
    private:
     const std::uint64_t basicSalary_;

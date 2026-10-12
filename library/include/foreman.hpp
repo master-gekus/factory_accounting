@@ -6,16 +6,13 @@
 namespace facc {
   template <class D>
   class Foreman final : public Employee<D> {
-   public:
-    using Type = typename Employee<D>::Type;
-
    private:
     template <typename... Args>
     Foreman(Args &&...args) : Employee<D>{std::forward<Args>(args)...} {}
 
    public:
-    virtual Type type() const noexcept {
-      return Employee<D>::Type::Foreman;
+    std::uint64_t totalSalary(int mounth) const override {
+      return Employee<D>::basicSalary() * 15;
     }
 
     friend class FactoryAccounting<D>;

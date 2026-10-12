@@ -23,8 +23,8 @@ TEST(FactoryAccounting, HireWorkers) {
     EXPECT_EQ(w2->subs().size(), 0);
     EXPECT_EQ(w1->boss(), nullptr);
     EXPECT_EQ(w2->boss(), nullptr);
-    EXPECT_TRUE(w1->type() == Factory::Type::Worker);
-    EXPECT_TRUE(w2->type() == Factory::Type::Worker);
+    EXPECT_NE(dynamic_cast<Factory::Worker *>(w1), nullptr);
+    EXPECT_NE(dynamic_cast<Factory::Worker *>(w2), nullptr);
     EXPECT_EQ(w1->basicSalary(), 100u);
     EXPECT_EQ(w2->basicSalary(), 200u);
     EXPECT_EQ(w1->relativeStart(), 0);
@@ -52,8 +52,8 @@ TEST(FactoryAccounting, HireWorkers) {
     EXPECT_EQ(w2->subs().size(), 0);
     EXPECT_EQ(w1->boss(), nullptr);
     EXPECT_EQ(w2->boss(), nullptr);
-    EXPECT_TRUE(w1->type() == Factory::Type::Worker);
-    EXPECT_TRUE(w2->type() == Factory::Type::Worker);
+    EXPECT_NE(dynamic_cast<Factory::Worker *>(w1), nullptr);
+    EXPECT_NE(dynamic_cast<Factory::Worker *>(w2), nullptr);
     EXPECT_EQ(w1->basicSalary(), 100u);
     EXPECT_EQ(w2->basicSalary(), 200u);
     EXPECT_EQ(w1->relativeStart(), 0);
@@ -64,12 +64,12 @@ TEST(FactoryAccounting, HireWorkers) {
 TEST(FactoryAccounting, HireForeman) {
   using Factory = facc::FactoryAccounting<std::string>;
   Factory factory;
-  const auto *f{factory.hire<Factory::Foreman>(100u, 0, "Foreman 1")};
+  auto *f{factory.hire<Factory::Foreman>(100u, 0, "Foreman 1")};
   EXPECT_EQ(factory.employees().size(), 1);
   EXPECT_EQ(f->data(), "Foreman 1");
   EXPECT_EQ(f->subs().size(), 0);
   EXPECT_EQ(f->boss(), nullptr);
-  EXPECT_TRUE(f->type() == Factory::Type::Foreman);
+  EXPECT_NE(dynamic_cast<Factory::Foreman *>(f), nullptr);
   EXPECT_EQ(f->basicSalary(), 100u);
   EXPECT_EQ(f->relativeStart(), 0);
 }
@@ -77,12 +77,12 @@ TEST(FactoryAccounting, HireForeman) {
 TEST(FactoryAccounting, HireManager) {
   using Factory = facc::FactoryAccounting<std::string>;
   Factory factory;
-  const auto *m{factory.hire<Factory::Manager>(100u, 0, "Foreman 1")};
+  auto *m{factory.hire<Factory::Manager>(100u, 0, "Manager 1")};
   EXPECT_EQ(factory.employees().size(), 1);
-  EXPECT_EQ(m->data(), "Foreman 1");
+  EXPECT_EQ(m->data(), "Manager 1");
   EXPECT_EQ(m->subs().size(), 0);
   EXPECT_EQ(m->boss(), nullptr);
-  EXPECT_TRUE(m->type() == Factory::Type::Manager);
+  EXPECT_NE(dynamic_cast<Factory::Manager *>(m), nullptr);
   EXPECT_EQ(m->basicSalary(), 100u);
   EXPECT_EQ(m->relativeStart(), 0);
 }
@@ -149,7 +149,8 @@ TEST(FactoryAccounting, ChangeSubordination) {
   EXPECT_EQ(m->subs().size(), 1);
   EXPECT_TRUE(m->subs().contains(f));
 
-  // Отдаём рабочего менеджеру. У бригадира никого не остаётся. У менеджера - двое.
+  // Отдаём рабочего менеджеру. У бригадира никого не остаётся. У менеджера -
+  // двое.
   EXPECT_TRUE(factory.createSubordination(m, w));
   EXPECT_EQ(f->subs().size(), 0);
   EXPECT_EQ(w->boss(), m);

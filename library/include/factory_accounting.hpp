@@ -78,6 +78,14 @@ namespace facc {
       return true;
     }
 
+    std::uint64_t totalSalary(int mounth) const {
+      std::uint64_t total{0};
+      for (auto *e : employees_) {
+        total += e->totalSalary(mounth);
+      }
+      return total;
+    }
+
    private:
     bool canHaveSubs(Employee *boss) {
       return dynamic_cast<Foreman *>(boss) || dynamic_cast<Manager *>(boss);

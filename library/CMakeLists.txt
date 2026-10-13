@@ -2,9 +2,9 @@ cmake_minimum_required(VERSION 3.11)
 
 project(facc LANGUAGES CXX)
 
-add_library(${PROJECT_NAME} STATIC
+add_library(${PROJECT_NAME} INTERFACE
     include/employee.hpp
-    src/employee.cpp
+    #src/employee.cpp
     include/factory_accounting.hpp
     include/worker.hpp
     include/foreman.hpp
@@ -12,8 +12,9 @@ add_library(${PROJECT_NAME} STATIC
     )
 
 target_include_directories(
-    ${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include
+    ${PROJECT_NAME} INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/include
 )
+
 set_target_properties(
     ${PROJECT_NAME}
     PROPERTIES CXX_STANDARD 20

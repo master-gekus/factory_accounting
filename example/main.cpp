@@ -42,13 +42,24 @@ std::string work_duration_to_string_formatted(unsigned value) {
   return std::format(" {:2}л.{:2}м. ", value / 12, value % 12);
 }
 
+size_t utf8Len(const std::string &s) {
+  return std::count_if(s.begin(), s.end(), [](char c) {
+    return (static_cast<unsigned char>(c) & 0xC0) != 0x80;
+  });
+}
+
 std::uint64_t printRecursive(const std::vector<Employee *> &employees,
                              int mounth,
                              int level = 0) {
   std::uint64_t total{0};
   for (auto *e : employees) {
+    auto padding{76 - utf8Len(e->data()) - level * 2};
+    if (padding < 0) {
+      padding = 0;
+    }
+
     std::cout << "| " << std::string(level * 2, ' ') << e->data()
-              << std::string(76 - e->data().size() - level * 2, ' ') << "|";
+              << std::string(padding, ' ') << "|";
     if (e->relativeStart() >= mounth) {
       std::cout << "   ----   |    ---     |    ---     |";
     } else {

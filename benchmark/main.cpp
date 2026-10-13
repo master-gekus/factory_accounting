@@ -47,7 +47,7 @@ void createTree(Factory &factory,
 int main(int, char **) {
   {
     Factory factory;
-    createTree(factory, 1, 1000, 1000);
+    createTree(factory, 100, 10, 1000);
   }
   return 0;
 }

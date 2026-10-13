@@ -131,12 +131,23 @@ TEST(FactoryAccounting, SimpleSubordination) {
   EXPECT_TRUE(m->subs().contains(f));
 }
 
+TEST(FactoryAccounting, BlockCyclycSubordination) {
+  using Factory = facc::FactoryAccounting<std::string>;
+  Factory factory;
+  auto *a{factory.hire<Factory::Manager>(100u, 0)};
+  auto *b{factory.hire<Factory::Manager>(100u, 0)};
+  auto *c{factory.hire<Factory::Manager>(100u, 0)};
+  EXPECT_TRUE(factory.createSubordination(a, b));
+  EXPECT_TRUE(factory.createSubordination(b, c));
+  EXPECT_FALSE(factory.createSubordination(c, a));
+}
+
 TEST(FactoryAccounting, ChangeSubordination) {
   using Factory = facc::FactoryAccounting<std::string>;
   Factory factory;
-  auto *w{factory.hire<Factory::Worker>(100u, 0, "Worker")};
-  auto *f{factory.hire<Factory::Foreman>(100u, 0, "Foreman")};
-  auto *m{factory.hire<Factory::Manager>(100u, 0, "Manager")};
+  auto *w{factory.hire<Factory::Worker>(100u, 0)};
+  auto *f{factory.hire<Factory::Foreman>(100u, 0)};
+  auto *m{factory.hire<Factory::Manager>(100u, 0)};
   EXPECT_TRUE(factory.createSubordination(f, w));
   EXPECT_TRUE(factory.createSubordination(m, f));
   EXPECT_FALSE(factory.createSubordination(f, w));
@@ -157,6 +168,20 @@ TEST(FactoryAccounting, ChangeSubordination) {
   EXPECT_EQ(m->subs().size(), 2);
   EXPECT_TRUE(m->subs().contains(w));
   EXPECT_TRUE(m->subs().contains(f));
+
+  // Нельзя подчинить менеджера бригадиру, потому что бригадир подчинён
+  // менеджеру
+  EXPECT_FALSE(factory.createSubordination(f, m));
+
+  // Сначала надо снять подчинение
+  EXPECT_TRUE(factory.releaseSubordination(m, f));
+  EXPECT_TRUE(factory.createSubordination(f, m));
+  EXPECT_EQ(m->boss(), f);
+  EXPECT_EQ(f->subs().size(), 1);
+  EXPECT_TRUE(f->subs().contains(m));
+  EXPECT_EQ(w->boss(), m);
+  EXPECT_EQ(m->subs().size(), 1);
+  EXPECT_TRUE(m->subs().contains(w));
 }
 
 TEST(FactoryAccounting, ReleaseSubordination) {

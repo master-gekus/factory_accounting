@@ -74,17 +74,12 @@ namespace facc {
       subs_.erase(sub);
     }
 
-    bool hasSubRecurcive(Employee *sub) const {
-      if ((this == sub) || subs_.contains(sub)) {
-        return true;
-      }
-
-      for (auto *s : subs_) {
-        if (subs_.contains(sub)) {
+    bool hasBossIndirect(Employee *candidate) const {
+      for (auto *boss = boss_; boss; boss = boss->boss_) {
+        if (boss == candidate) {
           return true;
         }
       }
-
       return false;
     }
 

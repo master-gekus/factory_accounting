@@ -52,7 +52,7 @@ namespace facc {
       if ((boss == sub) || (!canHaveSubs(boss)) || (!employees_.contains(boss))
           || (!employees_.contains(sub))
           || boss->subs_.contains(sub)  // Уже в списке подчинённых.
-      ) {
+          || boss->hasBossIndirect(sub)) {
         return false;
       }
 

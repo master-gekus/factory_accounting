@@ -84,7 +84,7 @@ std::uint64_t printRecursive(const std::vector<Employee *> &employees,
 void printTopLevel(std::vector<Employee *> &employees, int mounth) {
   std::cout << "По состоянию на начало месяца " << mounth << std::endl;
   std::cout << "+=============================================================="
-               "===============+===========+============+============+"
+               "===============+==========+============+============+"
             << std::endl;
   std::cout << "| Имя                                                          "
                "               |   Стаж   |   Оклад    | Результат  |"
